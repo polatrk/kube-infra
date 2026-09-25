@@ -1,0 +1,13 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mysql-efs-sc
+  namespace: sampleapp
+provisioner: efs.csi.aws.com 
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-0523b05068e259475
+  directoryPerms: "700"
+
+# TODO: mettre ebs comme provisioneur comme on aura des ec2 aws
