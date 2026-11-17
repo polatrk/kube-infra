@@ -7,7 +7,7 @@ spec:
   selector:
     app: sampleapp
   ports:
-  - port: 80
+  - port: 8081
     targetPort: 80
 ---
 apiVersion: apps/v1
@@ -26,14 +26,14 @@ spec:
     spec:
       containers:
       - name: sampleapp
-        image: harbor.polatrk-server.fr/kube/sampleapp:v1
+        image: 192.168.49.1/kube/sampleapp:v1
         env:
         - name: APP_DEBUG
           value: "true"
         - name: APP_ENV
           value: "dev"
         - name: APP_KEY
-          value: 
+          value: "xxxxxx"
         - name: DB_CONNECTION
           value: "mysql"
         - name: DB_HOST
@@ -45,7 +45,7 @@ spec:
         - name: DB_USERNAME
           value: "app_user"
         - name: DB_PASSWORD
-          value: "app_password"
+          value: "xxxxxx"
         ports:
         - containerPort: 80
       imagePullSecrets:
