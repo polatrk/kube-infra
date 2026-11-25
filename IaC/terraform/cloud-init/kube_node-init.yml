@@ -1,3 +1,4 @@
+# on créer un user ansible et on l'ajt au groupe sudo
 users:
   - name: ansible
     gecos: ansible
@@ -5,5 +6,6 @@ users:
     sudo: ALL=(ALL) NOPASSWD:ALL
     groups: sudo
     lock_passwd: false
-    ssh_authorized_keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILRS4L/xJe0sgDhf9SnrAA5rLDPovtyISubwHGVpiEgU pierrealexis.thiebot@gmail.com
+
+runcmd:
+  - sudo userdel -r ec2-user # on enleve le user céer par défaut sur amazon linux

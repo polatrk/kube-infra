@@ -1,4 +1,5 @@
 terraform {
+  # on ajt le provider aws qui sera installé avec le tf init
   required_providers {
     aws = {
       source  = "hashicorp/aws"
