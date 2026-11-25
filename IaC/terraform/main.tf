@@ -59,6 +59,20 @@ resource "aws_vpc_security_group_ingress_rule" "allow_tls" {
 
   depends_on = [aws_security_group.kube_security_group]
 }
+//////////////////////////
+resource "aws_vpc_security_group_ingress_rule" "allow_from-home" {
+  security_group_id = aws_security_group.kube_security_group.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "tcp"
+  from_port         = 22
+  to_port           = 22
+
+  tags = {
+    Name = "allow_from-home"
+  }
+
+  depends_on = [aws_security_group.kube_security_group]
+}
 
 resource "aws_vpc_security_group_ingress_rule" "allow_all_from_sg" {
   security_group_id            = aws_security_group.kube_security_group.id
@@ -83,6 +97,14 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_out" {
 
   depends_on = [aws_security_group.kube_security_group]
 }
+
+# resource "aws_vpc_security_group_vpc_association" "example" {
+#   security_group_id = aws_security_group.kube_security_group.id
+#   vpc_id            = aws_vpc.kube_vpc.id
+
+#   depends_on = [ aws_security_group.kube_security_group, aws_vpc.kube_vpc ]
+# }
+
 
 resource "aws_internet_gateway" "kube_igw" {
   vpc_id = aws_vpc.kube_vpc.id
@@ -115,7 +137,7 @@ resource "aws_route_table" "kube_route_table" {
   }
 
   route {
-    cidr_block = "0.0.0.0/24"
+    cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.kube_igw.id
   }
 
@@ -126,12 +148,20 @@ resource "aws_route_table" "kube_route_table" {
   depends_on = [aws_internet_gateway.kube_igw, aws_vpc.kube_vpc]
 }
 
+resource "aws_route_table_association" "kube_rta" {
+  subnet_id = aws_subnet.kube_public_subnet.id
+  route_table_id = aws_route_table.kube_route_table.id
+}
+
 resource "aws_instance" "kube_node" {
   count = 3
 
   ami           = data.aws_ami.amazon_linux.id
   instance_type = "t4g.small"
   subnet_id     = aws_subnet.kube_public_subnet.id
+  vpc_security_group_ids = [ aws_security_group.kube_security_group.id ]
+
+  user_data = file("./cloud-init/kube_node-init.yml")
 
   tags = {
     Name = "kube_node-${count.index}"

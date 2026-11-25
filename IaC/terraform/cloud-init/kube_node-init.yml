@@ -1,0 +1,9 @@
+users:
+  - name: ansible
+    gecos: ansible
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: sudo
+    lock_passwd: false
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILRS4L/xJe0sgDhf9SnrAA5rLDPovtyISubwHGVpiEgU pierrealexis.thiebot@gmail.com
