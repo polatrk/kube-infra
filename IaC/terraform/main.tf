@@ -2,6 +2,41 @@ provider "aws" {
   region = "eu-west-3"
 }
 
+############### configuration du IAM pour les permissions SSM
+# on créer un role IAM pour les insatnces
+resource "aws_iam_role" "ssm_node_role" {
+  name = "kube-ssm-node-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      },
+    ]
+  })
+  tags = {
+    Name    = "kube-ssm-node-role"
+  }
+}
+
+############### configuration des instances ec2
+
+# on attache la policie AmazonSSMManagedInstanceCore au role
+resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
+  role = aws_iam_role.ssm_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# on créer un profile pour les instances avec le role ssm 
+resource "aws_iam_instance_profile" "ssm_instance_profile" {
+  name = "kube-ssm-instance-profile"
+  role = aws_iam_role.ssm_node_role.name
+}
+
 # on définit l'image utilisée pour les vms
 data "aws_ami" "amazon_linux" {
   most_recent = true
@@ -150,6 +185,7 @@ resource "aws_instance" "kube_node" {
   instance_type = "t4g.small"
   subnet_id     = aws_subnet.kube_public_subnet.id
   vpc_security_group_ids = [ aws_security_group.kube_security_group.id ]
+  # iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
 
   user_data = file("./cloud-init/kube_node-init.yml") # on pointe vers le fichier de config du cloud-init pr créer le user ansible qui sera utilisé par Ansible du coup
 
