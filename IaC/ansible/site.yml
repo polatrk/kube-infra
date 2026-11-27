@@ -1,0 +1,4 @@
+- name: Setup kubernetes cluster
+  hosts: kube_master:kube_worker
+  roles:
+    - disable_swap
