@@ -20,6 +20,7 @@ resource "aws_iam_role" "ssm_node_role" {
   })
   tags = {
     Name    = "kube-ssm-node-role"
+    Project = "epikube"
   }
 }
 
@@ -55,6 +56,7 @@ resource "aws_vpc" "kube_vpc" {
 
   tags = {
     Name = "kube_vpc"
+    Project = "epikube"
   }
 }
 
@@ -65,6 +67,7 @@ resource "aws_security_group" "kube_security_group" {
 
   tags = {
     Name = "kube_security_group"
+    Project = "epikube"
   }
 
   depends_on = [aws_vpc.kube_vpc]
@@ -80,6 +83,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_80" {
 
   tags = {
     Name = "allow_80"
+    Project = "epikube"
   }
 
   depends_on = [aws_security_group.kube_security_group]
@@ -95,6 +99,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_tls" {
 
   tags = {
     Name = "allow_tls"
+    Project = "epikube"
   }
 
   depends_on = [aws_security_group.kube_security_group]
@@ -108,6 +113,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_all_from_sg" {
 
   tags = {
     Name = "allow_all_from_sg"
+    Project = "epikube"
   }
 
   depends_on = [aws_security_group.kube_security_group]
@@ -121,6 +127,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_out" {
 
   tags = {
     Name = "allow_all_out"
+    Project = "epikube"
   }
 
   depends_on = [aws_security_group.kube_security_group]
@@ -132,6 +139,7 @@ resource "aws_internet_gateway" "kube_igw" {
 
   tags = {
     Name = "kube_igw"
+    Project = "epikube"
   }
 
   depends_on = [aws_vpc.kube_vpc]
@@ -145,6 +153,7 @@ resource "aws_subnet" "kube_public_subnet" {
 
   tags = {
     Name = "kube_public_subnet"
+    Project = "epikube"
   }
 
   depends_on = [aws_internet_gateway.kube_igw]
@@ -166,6 +175,7 @@ resource "aws_route_table" "kube_route_table" {
 
   tags = {
     Name = "kube_route_table"
+    Project = "epikube"
   }
 
   depends_on = [aws_internet_gateway.kube_igw, aws_vpc.kube_vpc]
@@ -187,10 +197,12 @@ resource "aws_instance" "kube_node" {
   vpc_security_group_ids = [ aws_security_group.kube_security_group.id ]
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
 
-  user_data = file("./cloud-init/kube_node-init.yml") # on pointe vers le fichier de config du cloud-init pr créer le user ansible qui sera utilisé par Ansible du coup
+  # user_data = file("./cloud-init/kube_node-init.yml") # on pointe vers le fichier de config du cloud-init pr créer le user ansible qui sera utilisé par Ansible du coup
 
   tags = {
     Name = "kube_node-${count.index}" # on sépare les vm via leur nom pour les identifier plus facilement
+    Project = "epikube"
+    Kube_role = count.index == 0 ? "master" : "worker"
   }
 
   depends_on = [aws_subnet.kube_public_subnet]
@@ -203,6 +215,7 @@ resource "aws_eip" "kube_eip" {
 
   tags = {
     Name = "kube_eip"
+    Project = "epikube"
   }
 
   depends_on = [aws_instance.kube_node[0]]
