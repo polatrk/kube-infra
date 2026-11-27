@@ -185,7 +185,7 @@ resource "aws_instance" "kube_node" {
   instance_type = "t4g.small"
   subnet_id     = aws_subnet.kube_public_subnet.id
   vpc_security_group_ids = [ aws_security_group.kube_security_group.id ]
-  # iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
+  iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
 
   user_data = file("./cloud-init/kube_node-init.yml") # on pointe vers le fichier de config du cloud-init pr créer le user ansible qui sera utilisé par Ansible du coup
 
